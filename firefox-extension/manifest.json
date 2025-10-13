@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Google Meet Presence Detector",
+  "description": "Detects presence status from Google Meet and sends it to a local webhook for SafeEyes integration.",
+  "version": "1.0.0",
+  "icons": {
+    "48": "icons/presence-48.png",
+    "96": "icons/presence-96.png"
+  },
+  "background": {
+    "scripts": ["scripts/background.js"]
+  },
+  "content_scripts": [
+    {
+      "js": ["scripts/content.js"],
+      "matches": [
+        "https://meet.google.com/*"
+      ]
+    }
+  ],
+  "host_permissions": [
+    "http://localhost/*"
+  ],
+  "permissions": [
+    "tabs"
+  ]
+}
