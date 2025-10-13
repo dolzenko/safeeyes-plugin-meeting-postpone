@@ -33,7 +33,8 @@ def _should_skip_break() -> bool:
     presence = context["presence_manager"].get_status()
     if presence is None:
         return False
-    setting = f"presence_{presence.replace('-', '_')}"
+    # Normalize status: replace hyphens and spaces with underscores
+    setting = f"presence_{presence.replace('-', '_').replace(' ', '_')}"
     if setting not in context["plugin_config"]:
         logging.warning(f"{presence} is not a valid presence status.")
         return False
