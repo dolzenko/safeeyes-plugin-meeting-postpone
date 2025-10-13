@@ -14,7 +14,7 @@ def init(ctx, safeeyes_config, plugin_config) -> None:
     presence_manager = PresenceManager()
     context["presence_manager"] = presence_manager
     server_thread = Thread(
-        target=run_server, args=(presence_manager, 5000), daemon=True
+        target=run_server, args=(presence_manager,), daemon=True
     )
     server_thread.start()
 
@@ -38,9 +38,9 @@ def _should_skip_break() -> bool:
         logging.warning(f"{presence} is not a valid presence status.")
         return False
     if context["plugin_config"][setting]:
-        logging.info(f"Teams presence status is {presence}. Skipping break.")
+        logging.info(f"Presence status is {presence}. Skipping break.")
         return True
-    logging.info(f"Teams presence status is {presence}. Break allowed.")
+    logging.info(f"Presence status is {presence}. Break allowed.")
     return False
 
 
@@ -100,5 +100,5 @@ def run_server(presence_manager: PresenceManager, port=6776):
         SimpleHTTPRequestHandler(*args, presence_manager=presence_manager, **kwargs)
 
     httpd = HTTPServer(server_address, handler)
-    logging.info(f"Starting teams presence server on port {port}...")
+    logging.info(f"Starting presence server on port {port}...")
     httpd.serve_forever()
