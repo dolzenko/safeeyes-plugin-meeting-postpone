@@ -1,8 +1,8 @@
 {
   "meta": {
-    "name": "Do Not Disturb - Teams",
-    "description": "Skip breaks based on the Teams web app presence status.",
-    "version": "0.1"
+    "name": "Do Not Disturb - Multi-Platform",
+    "description": "Skip breaks based on presence status from Teams and Google Meet.",
+    "version": "0.2"
   },
   "dependencies": {
     "python_modules": [],
@@ -13,50 +13,62 @@
   },
   "settings": [
     {
+      "id": "presence_in_a_meeting",
+      "label": "Do not disturb while 'in-a-meeting' (Google Meet)",
+      "type": "BOOL",
+      "default": true
+    },
+    {
       "id": "presence_on_the_phone",
-      "label": "Do not disturb while 'on the phone'",
+      "label": "Do not disturb while 'on the phone' (Teams)",
       "type": "BOOL",
       "default": true
     },
     {
       "id": "presence_presenting",
-      "label": "Do not disturb while 'presenting'",
+      "label": "Do not disturb while 'presenting' (Teams)",
       "type": "BOOL",
       "default": true
     },
     {
+      "id": "presence_available",
+      "label": "Do not disturb while 'available' (Google Meet)",
+      "type": "BOOL",
+      "default": false
+    },
+    {
       "id": "presence_online",
-      "label": "Do not disturb while 'online'",
+      "label": "Do not disturb while 'online' (Teams)",
       "type": "BOOL",
       "default": false
     },
     {
       "id": "presence_busy",
-      "label": "Do not disturb while 'busy'",
+      "label": "Do not disturb while 'busy' (Teams)",
       "type": "BOOL",
       "default": false
     },
     {
       "id": "presence_do_not_disturb",
-      "label": "Do not disturb while 'do not disturb'",
+      "label": "Do not disturb while 'do not disturb' (Teams)",
       "type": "BOOL",
       "default": false
     },
     {
       "id": "presence_be_right_back",
-      "label": "Do not disturb while 'be right back'",
+      "label": "Do not disturb while 'be right back' (Teams)",
       "type": "BOOL",
       "default": false
     },
     {
       "id": "presence_away",
-      "label": "Do not disturb while 'away'",
+      "label": "Do not disturb while 'away' (Teams)",
       "type": "BOOL",
       "default": false
     },
     {
       "id": "presence_offline",
-      "label": "Do not disturb while 'offline'",
+      "label": "Do not disturb while 'offline' (Teams)",
       "type": "BOOL",
       "default": false
     }
