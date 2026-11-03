@@ -22,7 +22,7 @@
 ## 4. Documentation
 
 - [x] 4.1 Rewrite `README.md` to cover how detection works, installation as a symlink, the `meeting_apps` setting, and the migration steps from design.md. Verify that the README mentions extensions only in the upgrade steps, and no longer mentions port 6776 or presence states
-- [ ] 4.2 Write `docs/manual-test.md` with the step-by-step test and the results table from 2026-11-03, plus a check that a break during a call is postponed
+- [x] 4.2 Write `docs/manual-test.md` with the step-by-step test and the results table from 2026-11-03, plus a check that a break during a call is postponed
 
 ## 5. Integration check on this machine
 
