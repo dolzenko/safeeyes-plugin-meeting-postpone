@@ -1,10 +1,13 @@
 import json
 import logging
+import subprocess
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread, Lock
 
 GRACE_SECONDS = 30
+PACTL_COMMAND = ["pactl", "-f", "json", "list", "source-outputs"]
+PACTL_TIMEOUT_SECONDS = 5
 
 context = None
 
@@ -53,6 +56,21 @@ def capturing_binaries(pactl_json: str) -> set[str]:
         for stream in json.loads(pactl_json)
         if (binary := stream["properties"].get("application.process.binary"))
     }
+
+
+def read_capturing_binaries(run=subprocess.run) -> set[str]:
+    try:
+        result = run(
+            PACTL_COMMAND,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=PACTL_TIMEOUT_SECONDS,
+        )
+        return capturing_binaries(result.stdout)
+    except (OSError, subprocess.SubprocessError, ValueError, KeyError, TypeError) as error:
+        logging.warning("Cannot read capture streams from pactl: %s", error)
+        return set()
 
 
 def last_capture_time(

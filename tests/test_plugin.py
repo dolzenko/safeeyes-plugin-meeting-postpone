@@ -1,5 +1,7 @@
 import importlib.util
+import logging
 import pathlib
+import subprocess
 
 import pytest
 
@@ -48,3 +50,40 @@ def test_meeting_running_when_30_seconds_since_last_capture_then_false():
 
 def test_meeting_running_when_no_capture_seen_then_false():
     assert not plugin.meeting_running(last_capture=None, now=100.0)
+
+
+def _pactl_returning(stdout):
+    def run(args, **kwargs):
+        return subprocess.CompletedProcess(args, 0, stdout=stdout, stderr="")
+    return run
+
+
+def _pactl_raising(error):
+    def run(args, **kwargs):
+        raise error
+    return run
+
+
+def test_read_capturing_binaries_when_pactl_succeeds_then_returns_binaries():
+    assert plugin.read_capturing_binaries(_pactl_returning(fixture("slack_huddle"))) == {"slack"}
+
+
+@pytest.mark.parametrize(
+    "run",
+    [
+        _pactl_returning("not json"),
+        _pactl_returning('[{"no": "properties"}]'),
+        _pactl_raising(FileNotFoundError("pactl")),
+        _pactl_raising(subprocess.CalledProcessError(1, ["pactl"])),
+        _pactl_raising(subprocess.TimeoutExpired(["pactl"], 5)),
+    ],
+)
+def test_read_capturing_binaries_when_pactl_fails_then_returns_empty_set(run):
+    assert plugin.read_capturing_binaries(run) == set()
+
+
+def test_read_capturing_binaries_when_pactl_fails_then_logs_warning(caplog):
+    with caplog.at_level(logging.WARNING):
+        plugin.read_capturing_binaries(_pactl_returning("not json"))
+
+    assert "pactl" in caplog.text
