@@ -49,7 +49,7 @@ Because of that flag, SafeEyes loaded the old plugin and started its server even
 
 ### Keep detection functions separate from the SafeEyes hooks
 
-Two pure functions take their inputs as arguments. The first turns `pactl` JSON into the set of capturing binaries. The second decides "meeting running" from the time of the last capture, the current time and the grace period. The hooks and the polling thread call these functions. Tests use `unittest` from the standard library, with fixture JSON shaped like real `pactl` output.
+Two pure functions take their inputs as arguments. The first turns `pactl` JSON into the set of capturing binaries. The second decides "meeting running" from the time of the last capture, the current time and the grace period. The hooks and the polling thread call these functions. Tests use `pytest`, with fixture JSON shaped like real `pactl` output.
 
 ## Risks / Trade-offs
 
