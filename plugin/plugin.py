@@ -45,6 +45,14 @@ def _should_skip_break() -> bool:
     return False
 
 
+def capturing_binaries(pactl_json: str) -> set[str]:
+    return {
+        binary
+        for stream in json.loads(pactl_json)
+        if (binary := stream["properties"].get("application.process.binary"))
+    }
+
+
 class PresenceManager:
     def __init__(self):
         self._status = None
