@@ -87,3 +87,97 @@ def test_read_capturing_binaries_when_pactl_fails_then_logs_warning(caplog):
         plugin.read_capturing_binaries(_pactl_returning("not json"))
 
     assert "pactl" in caplog.text
+
+
+class FakeClock:
+    def __init__(self, now=1000.0):
+        self.now = now
+
+    def __call__(self):
+        return self.now
+
+
+def test_parse_meeting_apps_when_space_separated_then_returns_set():
+    assert plugin.parse_meeting_apps("  firefox   zoom ") == {"firefox", "zoom"}
+
+
+def test_monitor_when_listed_app_polled_then_meeting_running(monkeypatch):
+    monkeypatch.setattr(plugin, "read_capturing_binaries", lambda: {"slack"})
+    monitor = plugin.MeetingMonitor({"slack"}, clock=FakeClock())
+
+    monitor.poll()
+
+    assert monitor.is_meeting_running()
+
+
+def test_monitor_when_app_added_to_list_then_counts_as_meeting(monkeypatch):
+    monkeypatch.setattr(plugin, "read_capturing_binaries", lambda: {"zoom"})
+    monitor = plugin.MeetingMonitor(plugin.parse_meeting_apps("firefox zoom"), clock=FakeClock())
+
+    monitor.poll()
+
+    assert monitor.is_meeting_running()
+
+
+def test_monitor_when_grace_period_passes_then_meeting_not_running(monkeypatch):
+    clock = FakeClock()
+    reads = iter([{"chrome"}, set()])
+    monkeypatch.setattr(plugin, "read_capturing_binaries", lambda: next(reads))
+    monitor = plugin.MeetingMonitor({"chrome"}, clock=clock)
+    monitor.poll()
+    clock.now += plugin.GRACE_SECONDS
+
+    monitor.poll()
+
+    assert not monitor.is_meeting_running()
+
+
+@pytest.fixture
+def fresh_plugin(monkeypatch):
+    monkeypatch.setattr(plugin, "read_capturing_binaries", lambda: set())
+    monkeypatch.setattr(plugin, "_monitor", None)
+    monkeypatch.setattr(plugin, "_thread", None)
+    yield plugin
+    plugin.on_exit()
+
+
+def test_init_when_called_twice_then_one_polling_thread(fresh_plugin):
+    fresh_plugin.init({}, {}, {"meeting_apps": "firefox"})
+    first = fresh_plugin._thread
+
+    fresh_plugin.init({}, {}, {"meeting_apps": "firefox"})
+
+    assert fresh_plugin._thread is first and first.is_alive()
+
+
+def test_init_when_called_again_then_updates_meeting_apps(fresh_plugin):
+    fresh_plugin.init({}, {}, {"meeting_apps": "firefox"})
+
+    fresh_plugin.init({}, {}, {"meeting_apps": "slack zoom"})
+
+    assert fresh_plugin._monitor.meeting_apps == {"slack", "zoom"}
+
+
+def test_init_when_setting_missing_then_uses_default_apps(fresh_plugin):
+    fresh_plugin.init({}, {}, {})
+
+    assert fresh_plugin._monitor.meeting_apps == {"firefox", "chrome", "chromium", "slack"}
+
+
+def test_on_exit_when_thread_running_then_thread_stops(fresh_plugin):
+    fresh_plugin.init({}, {}, {})
+    thread = fresh_plugin._thread
+
+    fresh_plugin.on_exit()
+    thread.join(timeout=1)
+
+    assert not thread.is_alive()
+
+
+def test_init_when_called_right_after_disable_then_polling_resumes(fresh_plugin):
+    fresh_plugin.init({}, {}, {})
+    fresh_plugin.disable()
+
+    fresh_plugin.init({}, {}, {})
+
+    assert fresh_plugin._thread.is_alive() and not fresh_plugin._stop.is_set()

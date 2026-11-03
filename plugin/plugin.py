@@ -1,53 +1,54 @@
 import json
 import logging
 import subprocess
+import time
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from threading import Thread, Lock
+from threading import Event, Lock, Thread
 
 GRACE_SECONDS = 30
+POLL_SECONDS = 5
+DEFAULT_MEETING_APPS = "firefox chrome chromium slack"
 PACTL_COMMAND = ["pactl", "-f", "json", "list", "source-outputs"]
 PACTL_TIMEOUT_SECONDS = 5
 
 context = None
+_monitor = None
+_thread = None
+_stop = Event()
 
 
 def init(ctx, safeeyes_config, plugin_config) -> None:
-    global context
+    global context, _monitor, _thread, _stop
     context = ctx
-    context["plugin_config"] = plugin_config
-    presence_manager = PresenceManager()
-    context["presence_manager"] = presence_manager
-    server_thread = Thread(
-        target=run_server, args=(presence_manager,), daemon=True
-    )
-    server_thread.start()
+    meeting_apps = parse_meeting_apps(plugin_config.get("meeting_apps", DEFAULT_MEETING_APPS))
+    if _monitor is None:
+        _monitor = MeetingMonitor(meeting_apps)
+    else:
+        _monitor.meeting_apps = meeting_apps
+    if _thread is None or not _thread.is_alive() or _stop.is_set():
+        _stop = Event()
+        _thread = Thread(
+            target=_poll_until_stopped, args=(_stop,), name="meeting-monitor", daemon=True
+        )
+        _thread.start()
 
 
-def on_pre_break(break_obj) -> bool:
-    """Lifecycle method executes before the pre-break period."""
-    return _should_skip_break()
+def on_exit() -> None:
+    _stop.set()
 
 
-def on_start_break(break_obj) -> bool:
-    """Lifecycle method executes just before the break."""
-    return _should_skip_break()
+def disable() -> None:
+    _stop.set()
 
 
-def _should_skip_break() -> bool:
-    presence = context["presence_manager"].get_status()
-    if presence is None:
-        return False
-    # Normalize status: replace hyphens and spaces with underscores
-    setting = f"presence_{presence.replace('-', '_').replace(' ', '_')}"
-    if setting not in context["plugin_config"]:
-        logging.warning(f"{presence} is not a valid presence status.")
-        return False
-    if context["plugin_config"][setting]:
-        logging.info(f"Presence status is {presence}. Skipping break.")
-        return True
-    logging.info(f"Presence status is {presence}. Break allowed.")
-    return False
+def _poll_until_stopped(stop: Event) -> None:
+    while not stop.is_set():
+        _monitor.poll()
+        stop.wait(POLL_SECONDS)
+
+
+def parse_meeting_apps(setting: str) -> set[str]:
+    return set(setting.split())
 
 
 def capturing_binaries(pactl_json: str) -> set[str]:
@@ -85,61 +86,20 @@ def meeting_running(
     return last_capture is not None and now - last_capture < grace
 
 
-class PresenceManager:
-    def __init__(self):
-        self._status = None
+class MeetingMonitor:
+    def __init__(self, meeting_apps: set[str], clock=time.monotonic):
+        self.meeting_apps = meeting_apps
+        self._clock = clock
+        self._last_capture = None
         self._lock = Lock()
 
-    def set_status(self, status):
+    def poll(self) -> None:
+        binaries = read_capturing_binaries()
         with self._lock:
-            self._status = status
+            self._last_capture = last_capture_time(
+                binaries, self.meeting_apps, self._last_capture, self._clock()
+            )
 
-    def get_status(self):
+    def is_meeting_running(self) -> bool:
         with self._lock:
-            return self._status
-
-
-class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
-
-    def __init__(self, *args, **kwargs):
-        self.presence_manager = kwargs.pop("presence_manager", None)
-        super().__init__(*args, **kwargs)
-
-    def do_OPTIONS(self):
-        self.send_response(200, "ok")
-        self.add_cors_headers()
-        self.end_headers()
-
-    def do_POST(self):
-        self.add_cors_headers()
-        length = int(self.headers["Content-Length"])
-        body = self.rfile.read(length).decode("utf-8")
-
-        try:
-            data = json.loads(body)
-            if "status" in data:
-                self.presence_manager.set_status(data["status"])
-                self.send_response(200)
-                self.send_header("Content-type", "text/plain; charset=utf-8")
-                self.end_headers()
-                self.wfile.write(b"ok")
-            else:
-                self.send_error(400, "Missing 'status' in JSON data")
-        except json.JSONDecodeError:
-            self.send_error(400, "Invalid JSON data")
-
-    def add_cors_headers(self):
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-
-
-def run_server(presence_manager: PresenceManager, port=6776):
-    server_address = ("", port)
-
-    def handler(*args, **kwargs):
-        SimpleHTTPRequestHandler(*args, presence_manager=presence_manager, **kwargs)
-
-    httpd = HTTPServer(server_address, handler)
-    logging.info(f"Starting presence server on port {port}...")
-    httpd.serve_forever()
+            return meeting_running(self._last_capture, self._clock())
