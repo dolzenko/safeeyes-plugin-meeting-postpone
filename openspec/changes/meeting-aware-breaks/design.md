@@ -39,7 +39,7 @@ Alternative: `pactl subscribe` pushes events as they happen, but the plugin woul
 
 ### Postpone from `on_start_break`, never skip
 
-`on_start_break` sets `context.postponed = True` while a meeting is running, and returns `False`. `on_pre_break` always returns `False`, because the only thing it can do is skip, and a skip loses the break.
+`on_start_break` sets `context.postponed = True` while a meeting is running, and returns `False`. The plugin does not implement `on_pre_break`, because the only thing that hook can do is skip, and a skip loses the break.
 
 The plugin sets the attribute `context.postponed`, not `context["postponed"]`, because SafeEyes marks item access as soft-deprecated.
 
