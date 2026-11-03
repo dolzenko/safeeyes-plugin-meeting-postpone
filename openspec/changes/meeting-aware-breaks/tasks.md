@@ -16,7 +16,7 @@
 
 ## 3. Break postponement
 
-- [ ] 3.1 Write failing tests for the hooks: during a meeting, `on_start_break` sets `context.postponed` and returns `False`. Outside a meeting, it leaves `context.postponed` unchanged. `on_pre_break` always returns `False`. Implement the hooks and verify that the tests pass
+- [x] 3.1 Write failing tests for the hooks: during a meeting, `on_start_break` sets `context.postponed` and returns `False`. Outside a meeting, it leaves `context.postponed` unchanged. The plugin does not implement `on_pre_break`. Implement the hooks and verify that the tests pass
 - [ ] 3.2 Rewrite `plugin/config.json`: replace the ten presence settings with a `meeting_apps` TEXT setting whose default is `firefox chrome chromium slack`, declare `pactl` under `shell_commands`, remove `break_override_allowed`, and rename the plugin to "Meeting Do Not Disturb". Verify with a test that loads the file and checks the setting ids and the default
 
 ## 4. Documentation

@@ -2,6 +2,7 @@ import importlib.util
 import logging
 import pathlib
 import subprocess
+import types
 
 import pytest
 
@@ -181,3 +182,45 @@ def test_init_when_called_right_after_disable_then_polling_resumes(fresh_plugin)
     fresh_plugin.init({}, {}, {})
 
     assert fresh_plugin._thread.is_alive() and not fresh_plugin._stop.is_set()
+
+
+class StubMonitor:
+    def __init__(self, running):
+        self.running = running
+
+    def is_meeting_running(self):
+        return self.running
+
+
+@pytest.fixture
+def safeeyes_context(monkeypatch):
+    ctx = types.SimpleNamespace(postponed=False)
+    monkeypatch.setattr(plugin, "context", ctx)
+    return ctx
+
+
+def test_on_start_break_when_meeting_running_then_postpones(monkeypatch, safeeyes_context):
+    monkeypatch.setattr(plugin, "_monitor", StubMonitor(running=True))
+
+    plugin.on_start_break(None)
+
+    assert safeeyes_context.postponed
+
+
+def test_on_start_break_when_meeting_running_then_does_not_skip(monkeypatch, safeeyes_context):
+    monkeypatch.setattr(plugin, "_monitor", StubMonitor(running=True))
+
+    assert plugin.on_start_break(None) is False
+
+
+def test_on_start_break_when_no_meeting_then_break_unchanged(monkeypatch, safeeyes_context):
+    monkeypatch.setattr(plugin, "_monitor", StubMonitor(running=False))
+
+    assert plugin.on_start_break(None) is False and not safeeyes_context.postponed
+
+
+def test_on_start_break_when_monitor_not_started_then_break_unchanged(monkeypatch, safeeyes_context):
+    monkeypatch.setattr(plugin, "_monitor", None)
+
+    assert plugin.on_start_break(None) is False and not safeeyes_context.postponed
+

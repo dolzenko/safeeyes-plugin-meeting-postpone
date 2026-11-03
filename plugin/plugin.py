@@ -33,6 +33,13 @@ def init(ctx, safeeyes_config, plugin_config) -> None:
         _thread.start()
 
 
+def on_start_break(break_obj) -> bool:
+    if _monitor is not None and _monitor.is_meeting_running():
+        logging.info("A meeting app is using the microphone. Postponing the break.")
+        context.postponed = True
+    return False
+
+
 def on_exit() -> None:
     _stop.set()
 
