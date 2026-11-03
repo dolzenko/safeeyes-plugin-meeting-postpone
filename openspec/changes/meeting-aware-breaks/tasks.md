@@ -2,7 +2,7 @@
 
 ## 1. Remove the old presence pipeline
 
-- [ ] 1.1 Delete `chrome-extension/` and `firefox-extension/`, and verify that `git ls-files` lists no extension files
+- [x] 1.1 Delete `chrome-extension/` and `firefox-extension/`, and verify that `git ls-files` lists no extension files
 - [ ] 1.2 Move `plugin/.gitignore` to the repository root, so that `tests/` is covered too, and verify that `git status --ignored` lists `plugin/__pycache__/` as ignored
 
 ## 2. Meeting detection
