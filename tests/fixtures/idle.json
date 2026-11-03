@@ -1,0 +1,22 @@
+[
+  {
+    "index": 36,
+    "driver": "PipeWire",
+    "owner_module": null,
+    "client": null,
+    "source": 33727,
+    "sample_specification": "float32le 1ch 48000Hz",
+    "channel_map": "mono",
+    "corked": true,
+    "mute": false,
+    "balance": 0.0,
+    "buffer_latency_usec": 0.0,
+    "source_latency_usec": 0.0,
+    "resample_method": "PipeWire",
+    "properties": {
+      "node.name": "capture.rnnoise_source",
+      "media.name": "Noise Canceling source",
+      "media.class": "Stream/Input/Audio"
+    }
+  }
+]
