@@ -1,108 +1,55 @@
-# SafeEyes Do Not Disturb - Multi-Platform
+# SafeEyes Meeting Do Not Disturb
 
-Automatically skip SafeEyes breaks when you're in a meeting or have specific presence status on Microsoft Teams or Google Meet.
+A [SafeEyes](https://github.com/slgobinath/SafeEyes) plugin that postpones breaks while you are in a call. It works with strict mode, so you can make breaks unskippable without a break screen covering a meeting.
 
-## Features
+## How it works
 
-- **Multi-platform support**: Works with both Microsoft Teams and Google Meet
-- **Granular control**: Configure which presence states should skip breaks
-- **Browser extensions**: Chrome extension for Teams, Firefox extension for Google Meet
-- **SafeEyes plugin**: Receives presence updates via local webhook
+Every 5 seconds the plugin asks PipeWire which applications are capturing the microphone (`pactl -f json list source-outputs`). A meeting is running while an application on the meeting-app list holds the microphone, and for 30 seconds after it releases it.
 
-## Architecture
+When a break is due during a meeting, the plugin postpones it by the SafeEyes postpone duration. SafeEyes retries the break after that time, and the plugin postpones it again until the meeting ends.
 
-```
-┌─────────────────────┐         ┌─────────────────────┐
-│ Chrome Extension    │         │ Firefox Extension   │
-│ (Teams)             │         │ (Google Meet)       │
-└──────────┬──────────┘         └──────────┬──────────┘
-           │                               │
-           │    POST http://localhost:6776 │
-           │         {status: "..."}       │
-           └───────────────┬───────────────┘
-                           │
-                  ┌────────▼────────┐
-                  │  SafeEyes       │
-                  │  Plugin         │
-                  │  (HTTP Server)  │
-                  └─────────────────┘
-```
+This covers any call in a browser or desktop app that uses the microphone, for example Google Meet, Microsoft Teams and Slack huddles. Muting in the app or with the keyboard still counts as being in the call. A tab or app left open after the call does not.
+
+## Requirements
+
+- Linux with PipeWire and `pipewire-pulse`, or PulseAudio, so that `pactl` is installed
+- SafeEyes. Tested with 3.5.0.
 
 ## Installation
 
-### 1. Install Browser Extensions
+1. Link the `plugin/` directory into the SafeEyes plugins directory. The link name is the plugin id, and SafeEyes stores the plugin's settings under it:
 
-#### For Microsoft Teams (Chrome)
-1. Open Chrome
-2. Navigate to `chrome://extensions`
-3. Enable "Developer mode"
-4. Click "Load unpacked"
-5. Select the `chrome-extension/` directory
+   ```bash
+   ln -s "$PWD/plugin" ~/.config/safeeyes/plugins/teams-do-not-disturb
+   ```
 
-#### For Google Meet (Firefox)
-1. Open Firefox
-2. Navigate to `about:debugging#/runtime/this-firefox`
-3. Click "Load Temporary Add-on"
-4. Select `firefox-extension/manifest.json`
-
-### 2. Install SafeEyes Plugin
-
-Copy the `plugin/` directory to your SafeEyes plugins directory:
-
-```bash
-cp -r plugin ~/.config/safeeyes/plugins/do-not-disturb
-```
-
-Then enable and configure the plugin in SafeEyes settings.
+2. Restart SafeEyes.
+3. In SafeEyes settings, enable **Meeting Do Not Disturb**.
 
 ## Configuration
 
-The plugin provides individual toggles for each presence state:
+**Meeting apps** is a space-separated list of process names. The default is `firefox chrome chromium slack`.
 
-### Google Meet States
-- **in-a-meeting**: Active call in progress (default: enabled)
-- **available**: Not in a call (default: disabled)
+To find the name of another app, start a call in it and run:
 
-### Microsoft Teams States
-- **on the phone**: Active call (default: enabled)
-- **presenting**: Screen sharing (default: enabled)
-- **online**: Available (default: disabled)
-- **busy**: Busy status (default: disabled)
-- **do not disturb**: DND mode (default: disabled)
-- **be right back**: BRB status (default: disabled)
-- **away**: Away status (default: disabled)
-- **offline**: Offline (default: disabled)
+```bash
+pactl -f json list source-outputs | grep application.process.binary
+```
 
-## How It Works
+Do not add apps that use the microphone outside meetings, such as dictation tools. Their breaks would be postponed too.
 
-1. Browser extensions monitor presence status on their respective platforms
-2. When status changes, they POST to `http://localhost:6776` with format:
-   ```json
-   {
-     "status": "in-a-meeting"
-   }
-   ```
-3. SafeEyes plugin receives the update and checks configuration
-4. If the status is configured to skip breaks, upcoming breaks are cancelled
+## Upgrading from the browser-extension version
 
-## Development Notes
+1. Pull the new version and restart SafeEyes.
+2. Enable the plugin in SafeEyes settings. The old version could run its server while it was disabled. The new one does nothing until you enable it.
+3. Remove the Teams and Google Meet presence extensions from your browsers.
+4. Run the [manual test](docs/manual-test.md) before you enable strict mode.
 
-### Status Normalization
+## Development
 
-The plugin automatically normalizes status strings:
-- Hyphens and spaces are converted to underscores
-- Example: `"in-a-meeting"` → `presence_in_a_meeting`
-- Example: `"on the phone"` → `presence_on_the_phone`
-
-### Port Configuration
-
-The webhook server runs on port `6776` by default. This is configured in `plugin/plugin.py` line 96.
-
-## Troubleshooting
-
-- **Plugin not receiving updates**: Check that the browser extension is loaded and active
-- **Breaks not being skipped**: Verify the presence state is enabled in SafeEyes plugin settings
-- **Port conflicts**: Ensure port 6776 is not in use by another application
+```bash
+pytest -q
+```
 
 ## Attributions
 
