@@ -27,7 +27,7 @@
 ## 5. Integration check on this machine
 
 - [x] 5.1 Restart SafeEyes, enable the plugin, and verify in the SafeEyes log that the plugin loaded and that no server listens on port 6776 (`ss -ltn | grep 6776` prints nothing)
-- [ ] 5.2 Join a solo Meet call, run `safeeyes --take-break`, and verify that the break is postponed during the call and shown within the postpone duration plus 30 seconds after leaving it
+- [x] 5.2 Join a solo Meet call, run `safeeyes --take-break`, and verify that the break is postponed during the call and shown within the postpone duration plus 30 seconds after leaving it
 - [ ] 5.3 Enable strict mode and repeat 5.2
 
 ## Workflow follow-up
