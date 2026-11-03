@@ -1,77 +1,22 @@
 {
   "meta": {
-    "name": "Do Not Disturb - Multi-Platform",
-    "description": "Skip breaks based on presence status from Teams and Google Meet.",
-    "version": "0.2"
+    "name": "Meeting Do Not Disturb",
+    "description": "Postpone breaks while a meeting app is using the microphone.",
+    "version": "1.0"
   },
   "dependencies": {
     "python_modules": [],
-    "shell_commands": [],
+    "shell_commands": ["pactl"],
     "operating_systems": [],
     "desktop_environments": [],
     "resources": []
   },
   "settings": [
     {
-      "id": "presence_in_a_meeting",
-      "label": "Do not disturb while 'in-a-meeting' (Google Meet)",
-      "type": "BOOL",
-      "default": true
-    },
-    {
-      "id": "presence_on_the_phone",
-      "label": "Do not disturb while 'on the phone' (Teams)",
-      "type": "BOOL",
-      "default": true
-    },
-    {
-      "id": "presence_presenting",
-      "label": "Do not disturb while 'presenting' (Teams)",
-      "type": "BOOL",
-      "default": true
-    },
-    {
-      "id": "presence_available",
-      "label": "Do not disturb while 'available' (Google Meet)",
-      "type": "BOOL",
-      "default": false
-    },
-    {
-      "id": "presence_online",
-      "label": "Do not disturb while 'online' (Teams)",
-      "type": "BOOL",
-      "default": false
-    },
-    {
-      "id": "presence_busy",
-      "label": "Do not disturb while 'busy' (Teams)",
-      "type": "BOOL",
-      "default": false
-    },
-    {
-      "id": "presence_do_not_disturb",
-      "label": "Do not disturb while 'do not disturb' (Teams)",
-      "type": "BOOL",
-      "default": false
-    },
-    {
-      "id": "presence_be_right_back",
-      "label": "Do not disturb while 'be right back' (Teams)",
-      "type": "BOOL",
-      "default": false
-    },
-    {
-      "id": "presence_away",
-      "label": "Do not disturb while 'away' (Teams)",
-      "type": "BOOL",
-      "default": false
-    },
-    {
-      "id": "presence_offline",
-      "label": "Do not disturb while 'offline' (Teams)",
-      "type": "BOOL",
-      "default": false
+      "id": "meeting_apps",
+      "label": "Meeting apps (process names, separated by spaces)",
+      "type": "TEXT",
+      "default": "firefox chrome chromium slack"
     }
-  ],
-  "break_override_allowed": true
+  ]
 }

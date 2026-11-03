@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import logging
 import pathlib
 import subprocess
@@ -224,3 +225,24 @@ def test_on_start_break_when_monitor_not_started_then_break_unchanged(monkeypatc
 
     assert plugin.on_start_break(None) is False and not safeeyes_context.postponed
 
+
+
+@pytest.fixture
+def plugin_config():
+    return json.loads((ROOT / "plugin" / "config.json").read_text())
+
+
+def test_config_when_loaded_then_only_setting_is_meeting_apps(plugin_config):
+    assert [s["id"] for s in plugin_config["settings"]] == ["meeting_apps"]
+
+
+def test_config_when_loaded_then_meeting_apps_default_matches_plugin(plugin_config):
+    assert plugin_config["settings"][0]["default"] == plugin.DEFAULT_MEETING_APPS
+
+
+def test_config_when_loaded_then_declares_pactl(plugin_config):
+    assert plugin_config["dependencies"]["shell_commands"] == ["pactl"]
+
+
+def test_config_when_loaded_then_break_override_not_allowed(plugin_config):
+    assert "break_override_allowed" not in plugin_config
