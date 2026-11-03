@@ -4,6 +4,8 @@ import logging
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread, Lock
 
+GRACE_SECONDS = 30
+
 context = None
 
 
@@ -51,6 +53,18 @@ def capturing_binaries(pactl_json: str) -> set[str]:
         for stream in json.loads(pactl_json)
         if (binary := stream["properties"].get("application.process.binary"))
     }
+
+
+def last_capture_time(
+    binaries: set[str], meeting_apps: set[str], previous: float | None, now: float
+) -> float | None:
+    return now if binaries & meeting_apps else previous
+
+
+def meeting_running(
+    last_capture: float | None, now: float, grace: float = GRACE_SECONDS
+) -> bool:
+    return last_capture is not None and now - last_capture < grace
 
 
 class PresenceManager:

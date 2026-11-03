@@ -10,7 +10,7 @@
 - [x] 2.1 Add `tests/fixtures/` with `pactl -f json list source-outputs` output for these cases: idle (filter only), Firefox call, Chrome call with two streams, Slack huddle, `handy` only, and an empty list. Base them on a real capture from this machine, and verify that each file parses as JSON
 - [x] 2.2 Write failing tests in `tests/test_plugin.py` for parsing capturing binaries from the fixtures, and run `pytest` to see them fail
 - [x] 2.3 Implement the parsing function in `plugin/plugin.py`, and verify that the parsing tests pass
-- [ ] 2.4 Write failing tests for the meeting decision: a listed app capturing, an unlisted app only, the 1-second drop, 30 seconds after the last capture, and no capture ever seen. Then implement the decision function and verify that the tests pass
+- [x] 2.4 Write failing tests for the meeting decision: a listed app capturing, an unlisted app only, the 1-second drop, 30 seconds after the last capture, and no capture ever seen. Then implement the decision function and verify that the tests pass
 - [ ] 2.5 Write a failing test where `pactl` fails or prints invalid JSON, and expect no capture plus a log line. Implement the error handling and verify that the test passes
 - [ ] 2.6 Implement the polling thread and the `meeting_apps` setting, which `init` must start only once. Verify this with a test that calls `init` twice and checks that one thread runs
 
