@@ -17,7 +17,7 @@
 ## 3. Break postponement
 
 - [x] 3.1 Write failing tests for the hooks: during a meeting, `on_start_break` sets `context.postponed` and returns `False`. Outside a meeting, it leaves `context.postponed` unchanged. The plugin does not implement `on_pre_break`. Implement the hooks and verify that the tests pass
-- [x] 3.2 Rewrite `plugin/config.json`: replace the ten presence settings with a `meeting_apps` TEXT setting whose default is `firefox chrome chromium slack`, declare `pactl` under `shell_commands`, remove `break_override_allowed`, and rename the plugin to "Meeting Do Not Disturb". Verify with a test that loads the file and checks the setting ids and the default
+- [x] 3.2 Rewrite `plugin/config.json`: replace the ten presence settings with a `meeting_apps` TEXT setting whose default is `firefox chrome chromium slack`, declare `pactl` under `shell_commands`, remove `break_override_allowed`, and rename the plugin to "Meeting Do Not Disturb" (later renamed in 5.4). Verify with a test that loads the file and checks the setting ids and the default
 
 ## 4. Documentation
 
@@ -29,6 +29,7 @@
 - [x] 5.1 Restart SafeEyes, enable the plugin, and verify in the SafeEyes log that the plugin loaded and that no server listens on port 6776 (`ss -ltn | grep 6776` prints nothing)
 - [x] 5.2 Join a solo Meet call, run `safeeyes --take-break`, and verify that the break is postponed during the call and shown within the postpone duration plus 30 seconds after leaving it
 - [x] 5.3 Enable strict mode and repeat 5.2
+- [ ] 5.4 Rename the plugin id to `meeting-postpone`, the display name to "Postpone During Meetings", and the repository to `safeeyes-plugin-meeting-postpone`. Verify that SafeEyes loads `meeting-postpone.plugin` with the plugin enabled, and that `git remote -v` points to the renamed repository
 
 ## Workflow follow-up
 

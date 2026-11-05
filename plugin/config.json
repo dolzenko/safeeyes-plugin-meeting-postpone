@@ -1,6 +1,6 @@
 {
   "meta": {
-    "name": "Meeting Do Not Disturb",
+    "name": "Postpone During Meetings",
     "description": "Postpone breaks while a meeting app is using the microphone.",
     "version": "1.0"
   },

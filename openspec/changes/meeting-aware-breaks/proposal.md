@@ -12,7 +12,7 @@ A manual test on 2026-11-03 showed a simpler signal works. A meeting app holds t
 - Postpone a break that falls due during a meeting, and retry until the meeting ends, instead of skipping it.
 - **BREAKING**: Remove the Chrome and Firefox extensions and the HTTP presence server on port 6776.
 - **BREAKING**: Replace the ten per-presence-state settings with a list of meeting apps.
-- Rename the plugin's display name and README to describe meetings in general, not Teams. The plugin id `teams-do-not-disturb` stays, so the existing install and SafeEyes config keep working.
+- **BREAKING**: Rename the plugin from `teams-do-not-disturb` to `meeting-postpone`, with the display name "Postpone During Meetings", and rename the repository to `safeeyes-plugin-meeting-postpone`. Existing installs must replace the plugin link and enable the plugin again.
 
 ## Capabilities
 

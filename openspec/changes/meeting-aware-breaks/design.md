@@ -2,7 +2,7 @@
 
 ## Context
 
-The target is SafeEyes 3.5.0 on Linux with PipeWire and `pipewire-pulse`, so `pactl` is available. The plugin keeps the id `teams-do-not-disturb`, because the installed copy is a symlink at `~/.config/safeeyes/plugins/teams-do-not-disturb` and SafeEyes stores its settings under that id.
+The target is SafeEyes 3.5.0 on Linux with PipeWire and `pipewire-pulse`, so `pactl` is available. SafeEyes uses the name of the plugin's directory in `~/.config/safeeyes/plugins/` as the plugin id, and stores the plugin's settings under that id. The id changes from `teams-do-not-disturb` to `meeting-postpone`, so an existing install must replace its link, and its settings entry starts fresh.
 
 SafeEyes calls a plugin's `on_pre_break` and `on_start_break` hooks. Returning `True` from either one skips the break. In `core.py`, after `on_start_break` returns, SafeEyes checks `context.postponed`. If the field is set, SafeEyes clears it and runs the break again after `postpone_duration`, without a pre-break notification and without checking `allow_postpone`. That path runs whether or not strict mode is on.
 
@@ -19,7 +19,6 @@ The manual test results are in proposal.md under Why.
 
 - Detecting meetings where the user never grants microphone access, such as listen-only webinars.
 - Suppressing the first pre-break notification that appears during a meeting.
-- Renaming the plugin id or the repository.
 
 ## Decisions
 
@@ -60,7 +59,7 @@ Three pure functions take their inputs as arguments. The first turns `pactl` JSO
 
 ## Migration Plan
 
-1. Pull the change. The symlinked install picks it up.
+1. Pull the change, and replace the `teams-do-not-disturb` link in `~/.config/safeeyes/plugins/` with a `meeting-postpone` link.
 2. Restart SafeEyes, then enable the plugin in its settings.
 3. Remove the Teams and Meet extensions from the browsers.
 4. Run the manual test in `docs/manual-test.md`, then enable strict mode.

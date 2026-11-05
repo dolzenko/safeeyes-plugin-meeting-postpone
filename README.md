@@ -1,4 +1,4 @@
-# SafeEyes Meeting Do Not Disturb
+# SafeEyes Postpone During Meetings
 
 A [SafeEyes](https://github.com/slgobinath/SafeEyes) plugin that postpones breaks while you are in a call. It works with strict mode, so you can make breaks unskippable without a break screen covering a meeting.
 
@@ -20,11 +20,11 @@ This covers any call in a browser or desktop app that uses the microphone, for e
 1. Link the `plugin/` directory into the SafeEyes plugins directory. The link name is the plugin id, and SafeEyes stores the plugin's settings under it:
 
    ```bash
-   ln -s "$PWD/plugin" ~/.config/safeeyes/plugins/teams-do-not-disturb
+   ln -s "$PWD/plugin" ~/.config/safeeyes/plugins/meeting-postpone
    ```
 
 2. Restart SafeEyes.
-3. In SafeEyes settings, enable **Meeting Do Not Disturb**.
+3. In SafeEyes settings, enable **Postpone During Meetings**.
 
 ## Configuration
 
@@ -40,10 +40,11 @@ Do not add apps that use the microphone outside meetings, such as dictation tool
 
 ## Upgrading from the browser-extension version
 
-1. Pull the new version and restart SafeEyes.
-2. Enable the plugin in SafeEyes settings. The old version could run its server while it was disabled. The new one does nothing until you enable it.
-3. Remove the Teams and Google Meet presence extensions from your browsers.
-4. Run the [manual test](docs/manual-test.md) before you enable strict mode.
+1. Quit SafeEyes and pull the new version.
+2. Remove the `teams-do-not-disturb` link from `~/.config/safeeyes/plugins/`, and create the `meeting-postpone` link as in [Installation](#installation). The plugin id has changed, so SafeEyes treats it as a new plugin.
+3. Start SafeEyes, and enable the plugin in its settings. The old version could run its server while it was disabled. The new one does nothing until you enable it.
+4. Remove the Teams and Google Meet presence extensions from your browsers.
+5. Run the [manual test](docs/manual-test.md) before you enable strict mode.
 
 ## Development
 
