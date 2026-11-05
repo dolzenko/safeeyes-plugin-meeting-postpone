@@ -2,7 +2,7 @@
   "meta": {
     "name": "Postpone During Meetings",
     "description": "Postpone breaks while a meeting app is using the microphone.",
-    "version": "1.0"
+    "version": "1.0.0"
   },
   "dependencies": {
     "python_modules": [],
