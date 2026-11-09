@@ -31,6 +31,10 @@ This covers any call in a browser or desktop app that uses the microphone, for e
 
 **Meeting apps** is a space-separated list of process names. The default is `firefox chrome chromium slack`.
 
+Set **Meeting apps** to `*` to postpone breaks during microphone capture by any application, including Firefox Nightly and apps without a process name. This mode queries both `source-outputs` and `sources`, ignores corked streams and speaker-monitor sources, and still counts muted but uncorked microphone streams. It uses the same polling interval and 30-second grace period as the app list.
+
+Wildcard mode also postpones breaks during dictation and microphone recording outside meetings. If an app closes or corks its stream while muted, microphone metadata cannot distinguish that call from an ended call after the grace period.
+
 To find the name of another app, start a call in it and run:
 
 ```bash
