@@ -33,6 +33,12 @@ def init(ctx, safeeyes_config, plugin_config) -> None:
         _thread.start()
 
 
+def on_pre_break(break_obj) -> bool:
+    # Preserve the due break while stopping later warning/audio plugins.
+    on_start_break(break_obj)
+    return context.postponed
+
+
 def on_start_break(break_obj) -> bool:
     if _monitor is not None and _monitor.is_meeting_running():
         logging.info("A meeting app is using the microphone. Postponing the break.")

@@ -29,7 +29,7 @@ If the name disappears while you are still in the call, the plugin will not prot
 1. Join a call.
 2. Wait 10 seconds, so that the plugin's next poll sees the call.
 3. Run `safeeyes --take-break`.
-4. Make sure that no break screen appears. If SafeEyes runs with `--debug`, `~/safeeyes.log` also shows "Postponing the break".
+4. Make sure that no pre-break notification, warning sound or break screen appears. The plugin must precede `notification` and `audiblealert` in the configuration's `plugins` list. If SafeEyes runs with `--debug`, `~/safeeyes.log` also shows "Postponing the break".
 5. Leave the call.
 6. Make sure that the break screen appears within the postpone duration plus 30 seconds.
 
