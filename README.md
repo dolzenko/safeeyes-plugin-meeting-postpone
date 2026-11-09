@@ -6,7 +6,7 @@ A [SafeEyes](https://github.com/slgobinath/SafeEyes) plugin that postpones break
 
 Every 5 seconds the plugin asks PipeWire which applications are capturing the microphone (`pactl -f json list source-outputs`). A meeting is running while an application on the meeting-app list holds the microphone, and for 30 seconds after it releases it.
 
-When a break is due during a meeting, the plugin postpones it by the SafeEyes postpone duration. SafeEyes retries the break after that time, and the plugin postpones it again until the meeting ends.
+When a break is due during a meeting, the plugin postpones it before the pre-break warning by the SafeEyes postpone duration. SafeEyes retries the same break after that time, and the plugin postpones it again until the meeting ends. It also checks again before the break screen, in case a call starts during the warning countdown.
 
 This covers any call in a browser or desktop app that uses the microphone, for example Google Meet, Microsoft Teams and Slack huddles. Muting in the app or with the keyboard still counts as being in the call. A tab or app left open after the call does not.
 
@@ -25,6 +25,7 @@ This covers any call in a browser or desktop app that uses the microphone, for e
 
 2. Restart SafeEyes.
 3. In SafeEyes settings, enable **Postpone During Meetings**.
+4. In `~/.config/safeeyes/safeeyes.json`, move its `meeting-postpone` entry before `notification` and `audiblealert` in the `plugins` list. SafeEyes calls plugins in this order; this lets the plugin suppress the warning and sound as well as the break screen. Restart SafeEyes after editing the file.
 
 ## Configuration
 
@@ -51,6 +52,8 @@ Do not add apps that use the microphone outside meetings, such as dictation tool
 ```bash
 pytest -q
 ```
+
+The optional `tests/test_safeeyes_core.py` tests use an installed SafeEyes to check warning suppression and preservation of short and long breaks. They replace timers, notifications and break windows with test doubles, and do not open windows or play audio. Without SafeEyes installed, these integration tests are skipped.
 
 ## Attributions
 
