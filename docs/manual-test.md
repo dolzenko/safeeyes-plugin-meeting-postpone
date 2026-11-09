@@ -35,6 +35,14 @@ If the name disappears while you are still in the call, the plugin will not prot
 
 If strict mode is on, repeat these steps.
 
+## 3. Check wildcard mode
+
+1. Set **Meeting apps** to `*` and restart SafeEyes.
+2. Repeat the call and mute checks with an app outside the default list, such as Firefox Nightly. An uncorked microphone stream postpones breaks even when muted.
+3. Test microphone recording or dictation: it also postpones breaks in this mode.
+4. Stop microphone capture, then capture only a speaker-monitor source. After the 30-second grace period, the monitor-only stream must not postpone breaks.
+5. Check that a corked stream or a source that has disappeared does not keep a meeting active beyond the grace period.
+
 ## Results
 
 On 2026-11-03, with SafeEyes 3.5.0 and PipeWire 1.6.8:

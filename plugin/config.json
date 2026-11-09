@@ -14,7 +14,7 @@
   "settings": [
     {
       "id": "meeting_apps",
-      "label": "Meeting apps (process names, separated by spaces)",
+      "label": "Meeting apps (process names, or * for any microphone)",
       "type": "TEXT",
       "default": "firefox chrome chromium slack"
     }

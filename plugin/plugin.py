@@ -58,24 +58,36 @@ def parse_meeting_apps(setting: str) -> set[str]:
     return set(setting.split())
 
 
-def capturing_binaries(pactl_json: str) -> set[str]:
+def capturing_binaries(pactl_json: str, sources_json: str | None = None) -> set[str]:
+    streams = json.loads(pactl_json)
+    if sources_json is not None:
+        microphones = {
+            source["index"] for source in json.loads(sources_json)
+            if not source["name"].endswith(".monitor")
+        }
+        streams = [
+            stream for stream in streams
+            if stream["corked"] is False and stream["source"] in microphones
+        ]
     return {
         binary
-        for stream in json.loads(pactl_json)
-        if (binary := stream["properties"].get("application.process.binary"))
+        for stream in streams
+        if (binary := stream.get("properties", {}).get("application.process.binary")
+            or ("*" if sources_json is not None else None))
     }
 
 
-def read_capturing_binaries(run=subprocess.run) -> set[str]:
+def read_capturing_binaries(run=subprocess.run, *, microphones_only=False) -> set[str]:
     try:
-        result = run(
-            PACTL_COMMAND,
-            capture_output=True,
-            text=True,
-            check=True,
-            timeout=PACTL_TIMEOUT_SECONDS,
-        )
-        return capturing_binaries(result.stdout)
+        commands = [PACTL_COMMAND]
+        if microphones_only:
+            commands.append(PACTL_COMMAND[:-1] + ["sources"])
+        outputs = [
+            run(command, capture_output=True, text=True, check=True,
+                timeout=PACTL_TIMEOUT_SECONDS).stdout
+            for command in commands
+        ]
+        return capturing_binaries(*outputs)
     except (OSError, subprocess.SubprocessError, ValueError, KeyError, TypeError) as error:
         logging.warning("Cannot read capture streams from pactl: %s", error)
         return set()
@@ -84,7 +96,7 @@ def read_capturing_binaries(run=subprocess.run) -> set[str]:
 def last_capture_time(
     binaries: set[str], meeting_apps: set[str], previous: float | None, now: float
 ) -> float | None:
-    return now if binaries & meeting_apps else previous
+    return now if binaries and ("*" in meeting_apps or binaries & meeting_apps) else previous
 
 
 def meeting_running(
@@ -101,7 +113,10 @@ class MeetingMonitor:
         self._lock = Lock()
 
     def poll(self) -> None:
-        binaries = read_capturing_binaries()
+        binaries = (
+            read_capturing_binaries(microphones_only=True)
+            if "*" in self.meeting_apps else read_capturing_binaries()
+        )
         with self._lock:
             self._last_capture = last_capture_time(
                 binaries, self.meeting_apps, self._last_capture, self._clock()
